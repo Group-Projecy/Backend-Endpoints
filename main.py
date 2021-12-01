@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, jsonify
 import os
 
-
 app = Flask(__name__)
 
 user = {
@@ -43,16 +42,28 @@ def login():
     email = "pgarfield@gmail.com"
     password = "password"
     content = request.json
+    # must add in encryption and decryption in future
     if content['email'] == email and content['password'] == password:
         result = {"Result": "True",
-               "HouseID": "12345"
-               }
+                  "HouseID": "12345"
+                  }
         return result
     else:
         return "False"
 
 
-
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    email = "pgarfield@gmail.com"
+    password = "password"
+    content = request.json
+    if content['email'] == email and content['password'] == password:
+        result = {"Result": "True",
+                  "HouseID": "12345"
+                  }
+        return result
+    else:
+        return "False"
 
 
 app.run(debug=True)
