@@ -3,10 +3,6 @@ import os
 
 app = Flask(__name__)
 
-user = {
-
-}
-
 STUDENT_CHOICES = {}
 ELECTIVES = [
     "Smart Technology",
@@ -45,25 +41,33 @@ def login():
     # must add in encryption and decryption in future
     if content['email'] == email and content['password'] == password:
         result = {"Result": "True",
-                  "HouseID": "12345"
+                  "HouseID": "1234567"
                   }
         return result
     else:
         return "False"
 
 
-@app.route("/login", methods=['GET', 'POST'])
-def login():
-    email = "pgarfield@gmail.com"
-    password = "password"
-    content = request.json
-    if content['email'] == email and content['password'] == password:
-        result = {"Result": "True",
-                  "HouseID": "12345"
-                  }
-        return result
+# returns the house main details
+@app.route("/house_room/<house_id>", methods=['GET', 'POST'])
+# returns the rooms that the house has
+def home_rooms(house_id):
+    rooms = [{
+        "temperature": 10,
+        "dateTime": "24:00:15T2021:12:02",
+        "room": "Bedroom #1"
+    },
+        {
+            "temperature": 20,
+            "dateTime": "24:00:15T2021:12:02",
+            "room": "Kitchen #2"
+        }]
+    if house_id == "1234567":
+        return jsonify(rooms)
     else:
-        return "False"
+        return str(house_id)
+
+
 
 
 app.run(debug=True)
