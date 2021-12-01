@@ -4,7 +4,9 @@ import os
 
 app = Flask(__name__)
 
+user = {
 
+}
 
 STUDENT_CHOICES = {}
 ELECTIVES = [
@@ -42,7 +44,10 @@ def login():
     password = "password"
     content = request.json
     if content['email'] == email and content['password'] == password:
-        return "True"
+        result = {"Result": "True",
+               "HouseID": "12345"
+               }
+        return result
     else:
         return "False"
 
