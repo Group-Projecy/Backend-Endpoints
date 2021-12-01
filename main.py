@@ -48,7 +48,7 @@ def login():
         return "False"
 
 
-# returns the house main details
+# returns the house main room details
 @app.route("/house_room/<house_id>", methods=['GET', 'POST'])
 # returns the rooms that the house has
 def home_rooms(house_id):
@@ -68,6 +68,22 @@ def home_rooms(house_id):
         return str(house_id)
 
 
+@app.route("/oil_level_current/<house_id>", methods=['GET', 'POST'])
+# returns the rooms that the house has
+def current_levels(house_id):
+    # get the most recent recording of the oil
+    result = {
+        "oil_level": 10,  # percent out a hundred in number
+    }
+    if house_id == "1234567":
+        return jsonify(result)
+    else:
+        return str(house_id)
+
+    if house_id == "1234567":
+        return jsonify(rooms)
+    else:
+        return str(house_id)
 
 
 app.run(debug=True)
