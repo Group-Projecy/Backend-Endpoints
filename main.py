@@ -1,11 +1,8 @@
 from flask import Flask, render_template, request, redirect, jsonify
-from cryptography.fernet import Fernet
-import os
-import pyaes, pbkdf2, binascii, os, secrets
-
-
-
-import rsa
+import secrets
+import base64
+from Crypto import Random
+from Crypto.Cipher import AES
 
 app = Flask(__name__)
 
@@ -16,6 +13,30 @@ ELECTIVES = [
     "Immersive Technologies",
     "Service Oriented Architecture"
 ]
+
+
+
+BS = 16
+pad = lambda s: bytes(s + (BS - len(s) % BS) * chr(BS - len(s) % BS), 'utf-8')
+unpad = lambda s : s[0:-ord(s[-1:])]
+
+class AESCipher:
+
+    def __init__( self, key ):
+        self.key = bytes(key, 'utf-8')
+
+    def encrypt( self, raw ):
+        raw = pad(raw)
+        iv = "encryptionIntVec".encode('utf-8')
+        print(iv)
+        cipher = AES.new(self.key, AES.MODE_CBC, iv )
+        return base64.b64encode( iv + cipher.encrypt( raw ) )
+
+    def decrypt( self, enc ):
+        enc = base64.b64decode(enc)
+        iv = enc[:16]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv )
+        return unpad(cipher.decrypt( enc[16:] )).decode('utf8')
 
 
 @app.route("/")
@@ -58,15 +79,10 @@ def login():
 @app.route("/house_room/<house_id>", methods=['GET', 'POST'])
 # returns the rooms that the house has
 def home_rooms(house_id):
-    key= "7625e224dc0f0ec91ad28c1ee67b1eb96d1a5459533c5c950f44aae1e32f2da3"
-    iv = "101315118313650930995547809318182348577749662182204730410557592337503452909597"
-    test= "sfsdfd";
+    key = secrets.token_bytes(32)
+    print(type(key))
     print(key)
-    print(iv)
-    aes = pyaes.AESModeOfOperationCTR(key, pyaes.Counter(iv))
-    print(aes)
-    ciphertext = aes.encrypt(test)
-    print('Encrypted:', binascii.hexlify(ciphertext))
+
     rooms = [{
         "temperature": 10,
         "dateTime": "24:00:15T2021:12:02",
@@ -148,9 +164,6 @@ def usage_last_7(house_id):
         return jsonify(result)
     else:
         return str(house_id)
-
-
-
 
 
 app.run(debug=True)
