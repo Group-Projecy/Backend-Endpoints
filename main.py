@@ -80,7 +80,7 @@ def current_levels(house_id):
     else:
         return str(house_id)
 
-
+#needed for main page
 @app.route("/average_temperature_house/<house_id>", methods=['GET'])
 def average_temperature(house_id):
     # get the average temperature of the house
