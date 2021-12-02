@@ -80,10 +80,5 @@ def current_levels(house_id):
     else:
         return str(house_id)
 
-    if house_id == "1234567":
-        return jsonify(rooms)
-    else:
-        return str(house_id)
-
 
 app.run(debug=True)
