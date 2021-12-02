@@ -81,4 +81,16 @@ def current_levels(house_id):
         return str(house_id)
 
 
+@app.route("/average_temperature_house/<house_id>", methods=['GET'])
+def average_temperature(house_id):
+    # get the average temperature of the house
+    result = {
+        "temperature": 30,  # return as int
+    }
+    if house_id == "1234567":
+        return jsonify(result)
+    else:
+        return str(house_id)
+
+
 app.run(debug=True)
