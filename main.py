@@ -1,5 +1,11 @@
 from flask import Flask, render_template, request, redirect, jsonify
+from cryptography.fernet import Fernet
 import os
+import pyaes, pbkdf2, binascii, os, secrets
+
+
+
+import rsa
 
 app = Flask(__name__)
 
@@ -52,6 +58,15 @@ def login():
 @app.route("/house_room/<house_id>", methods=['GET', 'POST'])
 # returns the rooms that the house has
 def home_rooms(house_id):
+    key= "7625e224dc0f0ec91ad28c1ee67b1eb96d1a5459533c5c950f44aae1e32f2da3"
+    iv = "101315118313650930995547809318182348577749662182204730410557592337503452909597"
+    test= "sfsdfd";
+    print(key)
+    print(iv)
+    aes = pyaes.AESModeOfOperationCTR(key, pyaes.Counter(iv))
+    print(aes)
+    ciphertext = aes.encrypt(test)
+    print('Encrypted:', binascii.hexlify(ciphertext))
     rooms = [{
         "temperature": 10,
         "dateTime": "24:00:15T2021:12:02",
@@ -133,6 +148,9 @@ def usage_last_7(house_id):
         return jsonify(result)
     else:
         return str(house_id)
+
+
+
 
 
 app.run(debug=True)
