@@ -80,13 +80,55 @@ def current_levels(house_id):
     else:
         return str(house_id)
 
-#needed for main page
+
+# needed for home page
 @app.route("/average_temperature_house/<house_id>", methods=['GET'])
 def average_temperature(house_id):
     # get the average temperature of the house
     result = {
         "temperature": 30,  # return as int
     }
+    if house_id == "1234567":
+        return jsonify(result)
+    else:
+        return str(house_id)
+
+
+app.run(debug=True)
+
+
+# get oil usage last 7 days
+@app.route("/usage/<house_id>", methods=['GET'])
+def usage_last_7(house_id):
+    # get the usage last 7 days
+    result = [{
+        "oilUsed": 100,  # oil used in litres
+        "day": "2021:11:02",
+    },
+        {
+            "oilUsed": 7000,  # oil used in litres
+            "day": "2021:11:03",
+        },
+        {
+            "oilUsed": 0,  # oil used in litres
+            "day": "2021:11:04",
+        },
+        {
+            "oilUsed": 50,  # oil used in litres
+            "day": "2021:11:05",
+        },
+        {
+            "oilUsed": 1000,  # oil used in litres
+            "day": "2021:11:06",
+        },
+        {
+            "oilUsed": 1000,  # oil used in litres
+            "day": "2021:11:07",
+        },
+        {
+            "oilUsed": 1000,  # oil used in litres
+            "day": "2021:11:086",
+        }]
     if house_id == "1234567":
         return jsonify(result)
     else:
