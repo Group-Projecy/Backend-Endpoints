@@ -1,9 +1,12 @@
+import json
+
+from Cryptodome import Random
+from Cryptodome.Cipher import AES
 from flask import Flask, render_template, request, redirect, jsonify
 import secrets
 import base64
-from Crypto import Random
-from Crypto.Cipher import AES
-
+import base64
+from hashlib import md5
 app = Flask(__name__)
 
 STUDENT_CHOICES = {}
@@ -15,49 +18,58 @@ ELECTIVES = [
 ]
 
 
+#add this------------------------------------------------------------------------------------------------------
+BLOCK_SIZE = 16
 
-BS = 16
-pad = lambda s: bytes(s + (BS - len(s) % BS) * chr(BS - len(s) % BS), 'utf-8')
-unpad = lambda s : s[0:-ord(s[-1:])]
+def pad(data):
+    length = BLOCK_SIZE - (len(data) % BLOCK_SIZE)
+    return data + (chr(length) * length).encode()
 
-class AESCipher:
 
-    def __init__( self, key ):
-        self.key = bytes(key, 'utf-8')
+def unpad(data):
+    return data[:-(data[-1] if type(data[-1]) == int else ord(data[-1]))]
 
-    def encrypt( self, raw ):
-        raw = pad(raw)
-        iv = "encryptionIntVec".encode('utf-8')
-        print(iv)
-        cipher = AES.new(self.key, AES.MODE_CBC, iv )
-        return base64.b64encode( iv + cipher.encrypt( raw ) )
 
-    def decrypt( self, enc ):
-        enc = base64.b64decode(enc)
-        iv = enc[:16]
-        cipher = AES.new(self.key, AES.MODE_CBC, iv )
-        return unpad(cipher.decrypt( enc[16:] )).decode('utf8')
+def bytes_to_key(data, salt, output=48):
+    # extended from https://gist.github.com/gsakkis/4546068
+    assert len(salt) == 8, len(salt)
+    data += salt
+    key = md5(data).digest()
+    final_key = key
+    while len(final_key) < output:
+        key = md5(key + data).digest()
+        final_key += key
+    return final_key[:output]
 
+
+def encrypt(message, passphrase):
+    salt = Random.new().read(8)
+    key_iv = bytes_to_key(passphrase, salt, 32 + 16)
+    key = key_iv[:32]
+    iv = key_iv[32:]
+    aes = AES.new(key, AES.MODE_CBC, iv)
+    return base64.b64encode(b"Salted__" + salt + aes.encrypt(pad(message)))
+
+
+def decrypt(encrypted, passphrase):
+    encrypted = base64.b64decode(encrypted)
+    assert encrypted[0:8] == b"Salted__"
+    salt = encrypted[8:16]
+    key_iv = bytes_to_key(passphrase, salt, 32 + 16)
+    key = key_iv[:32]
+    iv = key_iv[32:]
+    aes = AES.new(key, AES.MODE_CBC, iv)
+    return unpad(aes.decrypt(encrypted[16:]))
+
+
+password = "YourSecretKeyForEncryption&Descryption".encode()
+ct_b64 = "U2FsdGVkX1/7+GLNZ8n/JzMwCZ7tncsy6gpMYdCkXms="
+#---------------------------------------------------------------------------------------------------------------------------------
 
 @app.route("/")
 def index():
     return render_template("index.html", electives=ELECTIVES)
 
-
-@app.route("/register", methods=["POST"])
-def register():
-    email = request.form.get("email")
-    print(email)
-    elective = request.form.get("elective")
-    if not email or not elective or elective not in ELECTIVES:
-        return render_template("failure.html")
-    # STUDENTS_CHOICES[email]=elective
-    # cur = mysql.connection.cursor()
-    # cur.execute("INSERT INTO students(name, elective) VALUES (%s, %s)", (email, elective))
-    # mysql.connection.commit()
-    # cur.close()
-
-    return redirect("/registrants")
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -74,7 +86,7 @@ def login():
     else:
         return "False"
 
-
+#update these three ---------------------------------------------------------------------------------------------------------------------------------
 # returns the house main room details
 @app.route("/house_room/<house_id>", methods=['GET', 'POST'])
 # returns the rooms that the house has
@@ -94,7 +106,10 @@ def home_rooms(house_id):
             "room": "Kitchen #2"
         }]
     if house_id == "1234567":
-        return jsonify(rooms)
+        # rooms = jsonify(rooms);
+        rooms = str(rooms).encode()
+        rooms = encrypt(rooms,password)
+        return rooms
     else:
         return str(house_id)
 
@@ -107,7 +122,9 @@ def current_levels(house_id):
         "oil_level": 10,  # percent out a hundred in number
     }
     if house_id == "1234567":
-        return jsonify(result)
+        result = str(result).encode()
+        result = encrypt(result, password)
+        return result
     else:
         return str(house_id)
 
@@ -120,13 +137,16 @@ def average_temperature(house_id):
         "temperature": 30,  # return as int
     }
     if house_id == "1234567":
-        return jsonify(result)
+        result = str(result).encode()
+        result = encrypt(result, password)
+        return result
     else:
         return str(house_id)
 
 
 app.run(debug=True)
 
+#---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # get oil usage last 7 days
 @app.route("/usage/<house_id>", methods=['GET'])
@@ -161,7 +181,7 @@ def usage_last_7(house_id):
             "day": "2021:11:086",
         }]
     if house_id == "1234567":
-        return jsonify(result)
+        return result
     else:
         return str(house_id)
 
