@@ -91,9 +91,7 @@ def login():
 @app.route("/house_room/<house_id>", methods=['GET', 'POST'])
 # returns the rooms that the house has
 def home_rooms(house_id):
-    key = secrets.token_bytes(32)
-    print(type(key))
-    print(key)
+
 
     rooms = [{
         "temperature": 10,
