@@ -86,7 +86,7 @@ def login():
     else:
         return "False"
 
-#update these three ---------------------------------------------------------------------------------------------------------------------------------
+#update these 2 ---------------------------------------------------------------------------------------------------------------------------------
 # returns the house main room details
 @app.route("/house_room/<house_id>", methods=['GET', 'POST'])
 # returns the rooms that the house has
@@ -128,6 +128,7 @@ def current_levels(house_id):
     else:
         return str(house_id)
 
+#---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # needed for home page
 @app.route("/average_temperature_house/<house_id>", methods=['GET'])
@@ -146,7 +147,6 @@ def average_temperature(house_id):
 
 app.run(debug=True)
 
-#---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # get oil usage last 7 days
 @app.route("/usage/<house_id>", methods=['GET'])
